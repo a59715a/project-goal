@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -13,35 +13,45 @@ interface User {
     password: string;
     lastLogin: string;
 }
+const userService = {
+    getUsers: async () => {
+        return [
+            {
+                id: 1,
+                name: "王小明",
+                email: "ming@example.com",
+                password: "123456",
+                status: "active",
+                lastLogin: "2024-03-15 14:30",
+            },
+            {
+                id: 2,
+                name: "李小華",
+                email: "hua@example.com",
+                password: "123456",
+                status: "active",
+                lastLogin: "2024-03-15 13:45",
+            },
+            {
+                id: 3,
+                name: "張小美",
+                email: "mei@example.com",
+                password: "123456",
+                status: "active",
+                lastLogin: "2024-03-14 09:20",
+            },
+        ];
+    }
+}
 
 export default function UserList() {
     // 使用者資料
-    const [users] = useState<User[]>([
-        {
-            id: 1,
-            name: "王小明",
-            email: "ming@example.com",
-            password: "123456",
-            status: "active",
-            lastLogin: "2024-03-15 14:30",
-        },
-        {
-            id: 2,
-            name: "李小華",
-            email: "hua@example.com",
-            password: "123456",
-            status: "active",
-            lastLogin: "2024-03-15 13:45",
-        },
-        {
-            id: 3,
-            name: "張小美",
-            email: "mei@example.com",
-            password: "123456",
-            status: "active",
-            lastLogin: "2024-03-14 09:20",
-        },
-    ]);
+    const [users, setUsers] = useState<User[]>([]);
+
+    // 使用 useEffect 來取得使用者資料 因為沒有監聽任何變數 所以是頁面第一次載入時會執行
+    useEffect(() => {
+        userService.getUsers().then(data => setUsers(data));
+    }, []);
 
     // 狀態標籤模板
     const statusTemplate = (rowData: User) => {
@@ -88,44 +98,44 @@ export default function UserList() {
                     field="id"
                     header="ID"
                     sortable
-                    style={{ width: "5%" }}
-                ></Column>
+                    className="w-[5%]"
+                />
                 <Column
                     field="name"
                     header="姓名"
                     sortable
-                    style={{ width: "15%" }}
-                ></Column>
+                    className="w-[15%]"
+                />
                 <Column
                     field="email"
                     header="電子郵件"
                     sortable
-                    style={{ width: "25%" }}
-                ></Column>
+                    className="w-[25%]"
+                />
                 <Column
                     field="password"
                     header="密碼"
                     sortable
-                    style={{ width: "15%" }}
-                ></Column>
+                    className="w-[15%]"
+                />
                 <Column
                     field="status"
                     header="狀態"
                     body={statusTemplate}
                     sortable
-                    style={{ width: "15%" }}
-                ></Column>
+                    className="w-[15%]"
+                />
                 <Column
                     field="lastLogin"
                     header="最後登入"
                     sortable
-                    style={{ width: "15%" }}
-                ></Column>
+                    className="w-[15%]"
+                />
                 <Column
                     body={actionTemplate}
                     header="操作"
-                    style={{ width: "10%" }}
-                ></Column>
+                    className="w-[10%]"
+                />
             </DataTable>
         </div>
     );

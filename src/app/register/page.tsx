@@ -46,8 +46,7 @@ export default function MemberForm() {
         // css flex: 使用 flexbox 來排版
         // justify-center: 水平置中
         // items-center: 垂直置中
-        // min-h-screen: 最小高度為螢幕高度
-        <div className="flex justify-center items-center min-h-screen">
+        <div className="flex justify-center items-center h-full">
             <Card title="會員註冊" className="w-full max-w-md">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">

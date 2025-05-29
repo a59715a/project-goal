@@ -44,6 +44,72 @@ export default function ShoppingCart() {
         setTotal(sum); // 設定總金額
     };
 
+    // 生成採購單內容
+    const generatePurchaseOrder = () => {
+        const date = new Date().toLocaleDateString('zh-TW');
+        let content = `採購單\n日期：${date}\n\n`;
+        content += '商品名稱\t數量\t單價\t小計\n';
+        content += '----------------------------------------\n';
+
+        products.forEach(product => {
+            if (product.quantity > 0) {
+                content += `${product.name}\t${product.quantity}\t${product.price}\t${product.price * product.quantity}\n`;
+            }
+        });
+
+        content += '----------------------------------------\n';
+        content += `總金額：${total}`;
+
+        return content;
+    };
+
+    // 列印採購單
+    const printPurchaseOrder = () => {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            const content = `
+                <html>
+                    <head>
+                        <title>採購單</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                padding: 20px;
+                            }
+                            pre {
+                                white-space: pre-wrap;
+                                font-family: monospace;
+                                font-size: 14px;
+                                line-height: 1.5;
+                            }
+                            @media print {
+                                body {
+                                    padding: 0;
+                                }
+                            }
+                        </style>
+                        <script>
+                            function printAndClose() {
+                                window.print();
+                                // 使用 setTimeout 確保列印對話框出現後再關閉
+                                setTimeout(function() {
+                                    window.close();
+                                }, 1000);
+                            }
+                            // 頁面載入完成後執行
+                            window.onload = printAndClose;
+                        </script>
+                    </head>
+                    <body>
+                        <pre>${generatePurchaseOrder()}</pre>
+                    </body>
+                </html>
+            `;
+            printWindow.document.write(content);
+            printWindow.document.close();
+        }
+    };
+
     return (
         <Card title="購物車" className="shadow-lg rounded-xl bg-slate-50">
             <div className="flex flex-col overflow-x-auto">
@@ -76,9 +142,28 @@ export default function ShoppingCart() {
                         </div>
                     </div>
                 ))}
-                <div className="flex flex-col items-center mt-6 gap-3">
+
+                <div className="flex flex-col items-center gap-4 mt-4">
                     <Button label="計算總金額" onClick={calculateTotal} className="rounded-full px-8 py-3 text-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow" />
                     <div className="text-2xl font-bold text-green-600">總金額: ${total}</div>
+
+                    {/* 採購單顯示區域 */}
+                    {total > 0 && (
+                        <div className="mt-4 p-4 bg-white rounded-lg shadow w-full max-w-2xl">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-xl font-bold">簡易採購單</h3>
+                                <Button
+                                    icon="pi pi-print"
+                                    label="列印採購單"
+                                    onClick={printPurchaseOrder}
+                                    className="p-button-rounded p-button-outlined"
+                                />
+                            </div>
+                            <pre className="whitespace-pre-wrap font-mono text-sm">
+                                {generatePurchaseOrder()}
+                            </pre>
+                        </div>
+                    )}
                 </div>
             </div>
         </Card>

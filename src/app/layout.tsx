@@ -30,10 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col m-0`}
       >
         <NavBar />
-        {children}
+        <div className="flex-1 overflow-auto">
+          {children}
+        </div>
       </body>
     </html>
   );
