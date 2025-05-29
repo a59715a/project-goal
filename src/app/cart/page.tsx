@@ -11,20 +11,25 @@ interface Product {
     quantity: number;
 }
 
+// 宣告一個 service 物件，裡面有 getProducts 方法  若是有串後端API 則在此處串接
+const productService = {
+    getProducts: (): Product[] => {
+        return [
+            { id: 1, name: "商品 A", price: 100, quantity: 0 },
+            { id: 2, name: "商品 B", price: 200, quantity: 0 },
+            { id: 3, name: "商品 C", price: 300, quantity: 0 },
+        ];
+    }
+}
 export default function ShoppingCart() {
     // 商品列表狀態
-    const [products, setProducts] = useState<Product[]>([
-        { id: 1, name: "商品 A", price: 100, quantity: 0 },
-        { id: 2, name: "商品 B", price: 200, quantity: 0 },
-        { id: 3, name: "商品 C", price: 300, quantity: 0 },
-    ]);
+    const [products, setProducts] = useState<Product[]>(productService.getProducts());
 
     // 總金額狀態
     const [total, setTotal] = useState<number>(0);
 
     // 更新商品數量
     const updateQuantity = (id: number, quantity: number) => {
-
         setProducts(
             // 遍歷 products 陣列每一個商品 類似for迴圈
             products.map((product) =>

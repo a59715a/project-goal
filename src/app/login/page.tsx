@@ -21,7 +21,7 @@ interface UserInfoIF {
 
 // 宣告一個 service 物件，裡面有 getUserInfo 方法  若是有串後端API 則在此處串接
 const authService = {
-    login: (email: string, password: string): UserInfoIF | null => {
+    login: (email: string, password: string): UserInfoIF | undefined => {
         if (email === "test@test.com" && password === "123456") {
             return {
                 email: "test@test.com",
@@ -30,7 +30,7 @@ const authService = {
                 gender: "男性",
             };
         }
-        return null;
+        return undefined;
     },
 };
 

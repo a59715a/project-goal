@@ -14,7 +14,7 @@ interface User {
     lastLogin: string;
 }
 const userService = {
-    getUsers: async () => {
+    getUsers: (): User[] => {
         return [
             {
                 id: 1,
@@ -50,7 +50,8 @@ export default function UserList() {
 
     // 使用 useEffect 來取得使用者資料 因為沒有監聽任何變數 所以是頁面第一次載入時會執行
     useEffect(() => {
-        userService.getUsers().then(data => setUsers(data));
+        const data = userService.getUsers();
+        setUsers(data);
     }, []);
 
     // 狀態標籤模板
