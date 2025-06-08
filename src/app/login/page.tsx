@@ -21,18 +21,48 @@ interface UserInfoIF {
 
 // 宣告一個 service 物件，裡面有 getUserInfo 方法  若是有串後端API 則在此處串接
 const authService = {
-    login: (email: string, password: string): UserInfoIF | undefined => {
-        if (email === "test@test.com" && password === "123456") {
-            return {
-                email: "test@test.com",
-                password: "123456",
-                name: "測試人名",
-                gender: "男性",
-            };
+    login: async (email: string, password: string) => {
+        try {
+            // 串接後端API
+            const response = await fetch(
+                // https://ottfwogpkzhitdekrnkq.supabase.co/rest/v1/UsersTbl 是後端API的URL
+                // ?select=*&email=eq.${encodeURIComponent(email)} 是後端API的參數
+                // encodeURIComponent(email) 是將 email 進行編碼
+                `https://ottfwogpkzhitdekrnkq.supabase.co/rest/v1/UsersTbl?select=*&email=eq.${encodeURIComponent(email)}`,
+                {
+                    // 使用 GET 方法
+                    method: 'GET',
+                    // 設定 headers
+                    headers: {
+                        // 設定 apikey
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90dGZ3b2dwa3poaXRkZWtybmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzQxMzMsImV4cCI6MjA2NDcxMDEzM30.56I4EssOz4RGnPcKeHl-vLI0D_QYEPbuKdzxWjMYmXU',
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('API請求失敗');
+            }
+
+            const data = await response.json();
+
+            if (data && data.length > 0 && data[0].password === password) {
+                return {
+                    email: data[0].email,
+                    password: data[0].password,
+                    name: data[0].name || '未知',
+                    gender: data[0].gender || '未知'
+                };
+            }
+
+            return undefined;
+        } catch (error) {
+            console.error('登入錯誤:', error);
+            return undefined;
         }
-        return undefined;
     },
 };
+
 
 export default function LoginForm() {
 
@@ -53,24 +83,30 @@ export default function LoginForm() {
     const [error, setError] = useState<string | undefined>(undefined);
 
     // 宣告一個 handleLogin 方法，用於處理 登入
-    const handleLogin = () => {
-        // 呼叫 service 物件的 getUserInfo 方法，並將 formData 的 email 和 password 傳入
-        const resultUserInfo = authService.login(formData.email, formData.password);
-        // 如果 resultUserInfo 有值
-        if (resultUserInfo) {
-            // 將 resultUserInfo 的值設定給 userInfo 變數
-            setUserInfo(resultUserInfo);
-            // 將 isInfoVisible 設為 true
-            setIsInfoVisible(true);
-            // 將 error 設為 undefined
-            setError(undefined);
-        }
-        // 如果 resultUserInfo 沒有值
-        else {
-            // 將 isInfoVisible 設為 false
+    const handleLogin = async () => {
+        try {
+            // 呼叫 service 物件的 login 方法，並將 formData 的 email 和 password 傳入
+            const resultUserInfo = await authService.login(formData.email, formData.password);
+            // 如果 resultUserInfo 有值
+            if (resultUserInfo) {
+                // 將 resultUserInfo 的值設定給 userInfo 變數
+                setUserInfo(resultUserInfo);
+                // 將 isInfoVisible 設為 true
+                setIsInfoVisible(true);
+                // 將 error 設為 undefined
+                setError(undefined);
+            }
+            // 如果 resultUserInfo 沒有值
+            else {
+                // 將 isInfoVisible 設為 false
+                setIsInfoVisible(false);
+                // 將 error 設為 "帳號或密碼錯誤"
+                setError("帳號或密碼錯誤");
+            }
+        } catch (err) {
+            console.error('登入處理錯誤:', err);
             setIsInfoVisible(false);
-            // 將 error 設為 "帳號或密碼錯誤"
-            setError("帳號或密碼錯誤");
+            setError("登入失敗，請稍後再試");
         }
     };
 

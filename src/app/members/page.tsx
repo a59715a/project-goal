@@ -12,46 +12,59 @@ interface User {
     status: string;
     password: string;
     lastLogin: string;
+    gender: string;
 }
+
 const userService = {
-    getUsers: (): User[] => {
-        return [
-            {
-                id: 1,
-                name: "王小明",
-                email: "ming@example.com",
-                password: "123456",
+    getUsers: async () => {
+        try {
+            const response = await fetch('https://ottfwogpkzhitdekrnkq.supabase.co/rest/v1/UsersTbl?select=*', {
+                headers: {
+                    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90dGZ3b2dwa3poaXRkZWtybmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxMzQxMzMsImV4cCI6MjA2NDcxMDEzM30.56I4EssOz4RGnPcKeHl-vLI0D_QYEPbuKdzxWjMYmXU'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('API請求失敗');
+            }
+
+            const data = await response.json();
+
+            // 添加缺少的字段
+            return data.map((user: {
+                id: number;
+                name: string;
+                email: string;
+                password: string;
+                gender: string;
+                created_at: string;
+            }) => ({
+                ...user,
                 status: "active",
-                lastLogin: "2024-03-15 14:30",
-            },
-            {
-                id: 2,
-                name: "李小華",
-                email: "hua@example.com",
-                password: "123456",
-                status: "active",
-                lastLogin: "2024-03-15 13:45",
-            },
-            {
-                id: 3,
-                name: "張小美",
-                email: "mei@example.com",
-                password: "123456",
-                status: "active",
-                lastLogin: "2024-03-14 09:20",
-            },
-        ];
+                lastLogin: "2024-03-15 14:30"
+            }));
+        } catch (error) {
+            console.error('獲取用戶數據時出錯:', error);
+            return [];
+        }
     }
 }
 
 export default function UserList() {
     // 使用者資料
     const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    // 使用 useEffect 來取得使用者資料 因為沒有監聽任何變數 所以是頁面第一次載入時會執行
+    // 使用 useEffect 來取得使用者資料
     useEffect(() => {
-        const data = userService.getUsers();
-        setUsers(data);
+        const fetchUsers = async () => {
+            setLoading(true);
+            const data = await userService.getUsers();
+            setUsers(data);
+            setLoading(false);
+        };
+
+        fetchUsers();
     }, []);
 
     // 狀態標籤模板
@@ -62,6 +75,11 @@ export default function UserList() {
                 severity={rowData.status === "active" ? "success" : "danger"}
             />
         );
+    };
+
+    // 性別模板
+    const genderTemplate = (rowData: User) => {
+        return rowData.gender === "male" ? "男" : "女";
     };
 
     // 操作按鈕模板
@@ -90,6 +108,7 @@ export default function UserList() {
                 value={users}
                 paginator
                 rows={5}
+                loading={loading}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 currentPageReportTemplate="顯示第 {first} 到 {last} 筆，共 {totalRecords} 筆"
@@ -111,20 +130,27 @@ export default function UserList() {
                     field="email"
                     header="電子郵件"
                     sortable
-                    className="w-[25%]"
+                    className="w-[20%]"
                 />
                 <Column
                     field="password"
                     header="密碼"
                     sortable
-                    className="w-[15%]"
+                    className="w-[10%]"
+                />
+                <Column
+                    field="gender"
+                    header="性別"
+                    body={genderTemplate}
+                    sortable
+                    className="w-[10%]"
                 />
                 <Column
                     field="status"
                     header="狀態"
                     body={statusTemplate}
                     sortable
-                    className="w-[15%]"
+                    className="w-[10%]"
                 />
                 <Column
                     field="lastLogin"
